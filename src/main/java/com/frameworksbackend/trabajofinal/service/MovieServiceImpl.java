@@ -47,7 +47,11 @@ public class MovieServiceImpl implements IMovieService{
         if (optionalMovie.isPresent()) {
             Movie existingMovie = optionalMovie.get();
 
-            // Updating movie properties
+            System.out.println("Received image in update request: " + movieDetails.getImage());
+
+            System.out.println("Movie ID: " + id);
+            System.out.println("New Image URL: " + movieDetails.getImage());
+
             existingMovie.setTitle(movieDetails.getTitle());
             existingMovie.setYear(movieDetails.getYear());
             existingMovie.setDuration(movieDetails.getDuration());
@@ -62,6 +66,7 @@ public class MovieServiceImpl implements IMovieService{
             throw new RuntimeException("Movie not found with id: " + id);
         }
     }
+
 
     @Override
     public void deleteMovie(Long id) {

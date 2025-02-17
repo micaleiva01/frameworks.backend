@@ -5,18 +5,12 @@ import com.frameworksbackend.trabajofinal.model.Movie;
 import com.frameworksbackend.trabajofinal.service.IMovieService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/movies")
@@ -25,7 +19,7 @@ public class MovieController {
 
     private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
     private final IMovieService movieService;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // 🔥 Handles JSON Parsing
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MovieController(IMovieService movieService) {
         this.movieService = movieService;
@@ -38,24 +32,23 @@ public class MovieController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> createMovie(@RequestBody String movieJson, @RequestHeader HttpHeaders headers) {
-        logger.info("📢 Received Headers: {}", headers);
-        logger.info("📢 Raw JSON Payload: {}", movieJson);
+        logger.info("headers: {}", headers);
+        logger.info("payload: {}", movieJson);
 
         try {
-            // ✅ Parse JSON into a Movie object
             Movie movie = objectMapper.readValue(movieJson, Movie.class);
-            logger.info("✅ Parsed Movie Object: {}", movie);
+            logger.info("Objecto creado: {}", movie);
 
             if (movie.getTitle() == null || movie.getTitle().trim().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Title is required.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Se requiere titulo.");
             }
 
             Movie savedMovie = movieService.saveMovie(movie);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedMovie);
 
         } catch (Exception e) {
-            logger.error("❌ Error processing request", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Invalid request format.");
+            logger.error("Error", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato invalido.");
         }
     }
 
@@ -79,7 +72,11 @@ public class MovieController {
     @PutMapping("/{id}")
     public ResponseEntity<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie movieDetails) {
         try {
+            System.out.println("Updating movie ID: " + id);
+            System.out.println("New Image URL: " + movieDetails.getImage());
+
             Movie updatedMovie = movieService.updateMovie(id, movieDetails);
+
             return ResponseEntity.ok(updatedMovie);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -89,7 +86,7 @@ public class MovieController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMovie(@PathVariable Long id) {
         movieService.deleteMovie(id);
-        return ResponseEntity.ok("Movie deleted successfully!");
+        return ResponseEntity.ok("Pelicula eliminada con exito");
     }
 
     @PostMapping("/{movieId}/actors/{actorId}")
